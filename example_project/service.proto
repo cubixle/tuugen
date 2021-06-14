@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package service;
+
+option go_package = 'internal/pb/service';
+
+service Service {
+    rpc CreateUser(User) returns (User) {};
+}
+
+message User {
+    string name = 1;
+    string team_id = 2;
+    string email = 3;
+}
