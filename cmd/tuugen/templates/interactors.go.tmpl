@@ -1,0 +1,15 @@
+package interactors
+
+import (
+    "fmt"{{ range .Imports }}
+    "{{ . }}"{{ end }}
+)
+
+type Interactor struct {
+    
+}
+{{ range .Funcs }}
+func (i *Interactor) {{ .Name }}({{.ArgsToStr}}) {{ if gt (len .Returns) 0 }}({{.ListToStr .Returns}}){{end}} {
+    return nil, fmt.Errorf("unimplemented")
+}
+{{ end }}

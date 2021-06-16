@@ -1,0 +1,22 @@
+package service
+
+import ({{ range .Imports }}
+    "{{ . }}"{{ end }}
+)
+
+type Service struct {
+    interactor *interactors.Interactor
+}
+{{ range .Funcs }}
+func (s *Service) {{ .Name }}({{.ArgsToStr}}) {{ if gt (len .Returns) 0 }}({{.ListToStr .Returns}}){{end}} {
+    res, err := s.interactor.{{.Name}}(ctx, req)
+    if err != nil {
+        return nil, errorToGRPCError(err)
+    }
+    return res, nil
+}
+{{ end }}
+
+func errorToGRPCError(err error) error {
+    return err
+}
