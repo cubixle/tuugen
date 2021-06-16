@@ -1,6 +1,7 @@
 project: tuugen_test_project
 import_path: github.com/cubixle/tuugen/example_project
 proto: service.proto
+service_name: Service
 db_models:
   - name: User
   - properties:

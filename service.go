@@ -12,17 +12,31 @@ import (
 	"strings"
 )
 
-func GenerateService(FS embed.FS, serviceName, importPath, protoFilepath, outputFile string) error {
+const grpcServiceFile = "./internal/pb/service/service_grpc.pb.go"
+
+func GenerateService(FS embed.FS, cfg Config) error {
 	//	read interface from project built protos.
-	if err := createFileFromProto(FS, serviceName, "templates/service.go.tmpl", importPath, protoFilepath, outputFile); err != nil {
+	if err := createFileFromProto(FS,
+		cfg.ServiceName,
+		"templates/service.go.tmpl",
+		cfg.ImportPath,
+		grpcServiceFile,
+		"./internal/service/service.go",
+	); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GenerateInteractor(FS embed.FS, serviceName, importPath, protoFilepath, outputFile string) error {
+func GenerateInteractor(FS embed.FS, cfg Config) error {
 	//	read interface from project built protos.
-	if err := createFileFromProto(FS, serviceName, "templates/interactors.go.tmpl", importPath, protoFilepath, outputFile); err != nil {
+	if err := createFileFromProto(FS,
+		cfg.ServiceName,
+		"templates/interactors.go.tmpl",
+		cfg.ImportPath,
+		grpcServiceFile,
+		"./internal/interactors/interactors.go",
+	); err != nil {
 		return err
 	}
 	return nil
