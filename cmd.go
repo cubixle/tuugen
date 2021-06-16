@@ -30,6 +30,9 @@ func GoImports() error {
 	if err := runCommand("goimports", []string{"-w", "internal/service/service.go"}); err != nil {
 		return err
 	}
+	if err := runCommand("goimports", []string{"-w", "internal/storage/"}); err != nil {
+		return err
+	}
 	return runCommand("goimports", []string{"-w", "internal/interactors/interactors.go"})
 }
 

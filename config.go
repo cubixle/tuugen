@@ -1,6 +1,8 @@
 package tuugen
 
-import "gopkg.in/yaml.v2"
+import (
+	"gopkg.in/yaml.v2"
+)
 
 type Config struct {
 	Project     string      `yaml:"project"`

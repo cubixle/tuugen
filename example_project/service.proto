@@ -6,10 +6,15 @@ option go_package = 'internal/pb/service';
 
 service Service {
     rpc CreateUser(User) returns (User) {};
+    rpc GetUser(IdRequest) returns (User) {};
 }
 
 message User {
     string name = 1;
     string team_id = 2;
     string email = 3;
+}
+
+message IdRequest {
+    string id = 1;
 }

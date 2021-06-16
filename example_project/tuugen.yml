@@ -2,9 +2,9 @@ project: tuugen_test_project
 import_path: github.com/cubixle/tuugen/example_project
 proto: service.proto
 service_name: Service
-db_models:
+data_models:
   - name: User
-  - properties:
+    properties:
       - name: id
         type: varchar
         autoinc: true
@@ -19,7 +19,7 @@ db_models:
       - name: updated_at
         type: timestamp
   - name: Team
-  - properties:
+    properties:
       - name: id
         type: varchar
       - name: name
