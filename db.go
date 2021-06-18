@@ -1,4 +1,4 @@
-package tuugen
+package main
 
 import (
 	"embed"

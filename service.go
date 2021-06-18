@@ -1,4 +1,4 @@
-package tuugen
+package main
 
 import (
 	"embed"
@@ -67,20 +67,24 @@ func createFileFromProto(FS embed.FS, cfg Config, templateFile, outputFile strin
 	if err != nil {
 		return nil
 	}
-	funcs, err := methodsFromProto(cfg)
+	def, err := parseProto(cfg)
 	if err != nil {
 		return err
 	}
 
-	if err := t.Execute(f, funcs); err != nil {
+	// dirty check to see if we need to import the interactors.
+	if strings.Contains(templateFile, "service") {
+		def.Imports = append(def.Imports, cfg.ImportPath+"/internal/interactors")
+	}
+
+	if err := t.Execute(f, def); err != nil {
 		return err
 	}
 
 	return f.Close()
 }
 
-func methodsFromProto(cfg Config) (serviceDef, error) {
-	funcs := []serviceFuncDef{}
+func parseProto(cfg Config) (serviceDef, error) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, cfg.GRPCFile, nil, 0)
 	if err != nil {
@@ -90,10 +94,17 @@ func methodsFromProto(cfg Config) (serviceDef, error) {
 	importStrs := []string{}
 	servicePath := filepath.Dir(cfg.GRPCFile)
 	for _, i := range f.Imports {
-		importStrs = append(importStrs, i.Name.Name)
+		importStrs = append(importStrs, i.Path.Value)
 	}
-	importStrs = append(importStrs, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"), cfg.ImportPath+"/internal/interactors")
+	importStrs = append(importStrs, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"))
 
+	funcs := parseFuncs(cfg, f)
+
+	return serviceDef{Funcs: funcs, Imports: importStrs}, nil
+}
+
+func parseFuncs(cfg Config, f *ast.File) []serviceFuncDef {
+	funcs := []serviceFuncDef{}
 	for _, m := range f.Scope.Objects {
 		if m.Name != cfg.ServiceName+"Server" {
 			continue
@@ -118,7 +129,7 @@ func methodsFromProto(cfg Config) (serviceDef, error) {
 			funcs = append(funcs, f)
 		}
 	}
-	return serviceDef{Funcs: funcs, Imports: importStrs}, nil
+	return funcs
 }
 
 func parseFieldList(fl *ast.FieldList) []string {

@@ -1,2 +1,2 @@
 build: 
-	 go build ./cmd/tuugen
+	 go build -o tuugen .
