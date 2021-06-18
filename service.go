@@ -94,7 +94,7 @@ func parseProto(cfg Config) (serviceDef, error) {
 	importStrs := []string{}
 	servicePath := filepath.Dir(cfg.GRPCFile)
 	for _, i := range f.Imports {
-		importStrs = append(importStrs, i.Path.Value)
+		importStrs = append(importStrs, strings.Replace(i.Path.Value, `"`, "", -1))
 	}
 	importStrs = append(importStrs, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"))
 
