@@ -49,3 +49,7 @@ data_models:
 
 - [ ] http routes
 - [ ] improve data model to struct. add more types.
+- [ ] Add golangci-lint
+- [ ] Add a useful Makefile
+- [ ] Add a useful Dockerfile
+- [ ] Add a readme template
