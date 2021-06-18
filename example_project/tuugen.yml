@@ -1,6 +1,7 @@
 project: tuugen_test_project
 import_path: github.com/cubixle/tuugen/example_project
-proto: service.proto
+proto_file: service.proto
+grpc_file: internal/pb/service/service_grpc.pb.go
 service_name: Service
 data_models:
   - name: User

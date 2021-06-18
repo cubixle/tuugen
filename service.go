@@ -12,34 +12,12 @@ import (
 	"strings"
 )
 
-const grpcServiceFile = "./internal/pb/service/service_grpc.pb.go"
-
 func GenerateService(FS embed.FS, cfg Config) error {
-	//	read interface from project built protos.
-	if err := createFileFromProto(FS,
-		cfg.ServiceName,
-		"templates/service.go.tmpl",
-		cfg.ImportPath,
-		grpcServiceFile,
-		"./internal/service/service.go",
-	); err != nil {
-		return err
-	}
-	return nil
+	return createFileFromProto(FS, cfg, "templates/service.go.tmpl", "./internal/service/service.go")
 }
 
 func GenerateInteractor(FS embed.FS, cfg Config) error {
-	//	read interface from project built protos.
-	if err := createFileFromProto(FS,
-		cfg.ServiceName,
-		"templates/interactors.go.tmpl",
-		cfg.ImportPath,
-		grpcServiceFile,
-		"./internal/interactors/interactors.go",
-	); err != nil {
-		return err
-	}
-	return nil
+	return createFileFromProto(FS, cfg, "templates/interactors.go.tmpl", "./internal/interactors/interactors.go")
 }
 
 type serviceDef struct {
@@ -71,7 +49,7 @@ func (s serviceFuncDef) ArgsToStr() string {
 }
 
 // generate the service/interactor template and store it to a file.
-func createFileFromProto(FS embed.FS, serviceName, templateFile, importPath, protoFilePath, outputFile string) error {
+func createFileFromProto(FS embed.FS, cfg Config, templateFile, outputFile string) error {
 	//  load service template
 	t, err := template.ParseFS(FS, templateFile)
 	if err != nil {
@@ -89,7 +67,7 @@ func createFileFromProto(FS embed.FS, serviceName, templateFile, importPath, pro
 	if err != nil {
 		return nil
 	}
-	funcs, err := methodsFromProto(protoFilePath, importPath, serviceName)
+	funcs, err := methodsFromProto(cfg)
 	if err != nil {
 		return err
 	}
@@ -101,25 +79,23 @@ func createFileFromProto(FS embed.FS, serviceName, templateFile, importPath, pro
 	return f.Close()
 }
 
-func methodsFromProto(filepath, importPath, serviceName string) (serviceDef, error) {
+func methodsFromProto(cfg Config) (serviceDef, error) {
 	funcs := []serviceFuncDef{}
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, filepath, nil, 0)
+	f, err := parser.ParseFile(fset, cfg.GRPCFile, nil, 0)
 	if err != nil {
-		return serviceDef{}, fmt.Errorf("failed to parse proto go file: %w", err)
+		return serviceDef{}, fmt.Errorf("failed to parse compiled proto go file: %w", err)
 	}
 
-	imports := f.Imports
 	importStrs := []string{}
-	// ast.Print(fset, imports)
-	// return serviceDef{}, nil
-	for _, i := range imports {
+	servicePath := filepath.Dir(cfg.GRPCFile)
+	for _, i := range f.Imports {
 		importStrs = append(importStrs, i.Name.Name)
 	}
-	importStrs = append(importStrs, importPath+"/internal/pb/service", importPath+"/internal/interactors")
+	importStrs = append(importStrs, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"), cfg.ImportPath+"/internal/interactors")
 
 	for _, m := range f.Scope.Objects {
-		if m.Name != serviceName+"Server" {
+		if m.Name != cfg.ServiceName+"Server" {
 			continue
 		}
 		decl := m.Decl.(*ast.TypeSpec)
@@ -140,10 +116,6 @@ func methodsFromProto(filepath, importPath, serviceName string) (serviceDef, err
 				f.Returns = parseFieldList(ft.Results)
 			}
 			funcs = append(funcs, f)
-			// err = ast.Print(fset, ft.Params)
-			// if err != nil {
-			// 	return serviceDef{}, err
-			// }
 		}
 	}
 	return serviceDef{Funcs: funcs, Imports: importStrs}, nil

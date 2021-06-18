@@ -22,8 +22,8 @@ func main() {
 		log.Fatalf("failed to load config, %v", err)
 	}
 
-	log.Println("Generating protos")
-	err = tuugen.GenerateProtos()
+	log.Printf("Generating protos from %s\n", cfg.ProtoFile)
+	err = tuugen.GenerateProtos(cfg.ProtoFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,6 +42,11 @@ func main() {
 	log.Println("Generating data models")
 	if err := tuugen.GenerateDataModels(FS, cfg); err != nil {
 		log.Fatalf("failed to generate data models: %v", err)
+	}
+
+	log.Println("Generate main.go")
+	if err := tuugen.GenerateMain(FS, cfg); err != nil {
+		log.Fatalf("failed to generate main file: %v", err)
 	}
 
 	log.Printf("Running 'go mod init %s' \n", cfg.ImportPath)

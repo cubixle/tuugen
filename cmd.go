@@ -15,9 +15,9 @@ func runCommand(cmd string, args []string) error {
 	return nil
 }
 
-func GenerateProtos() error {
+func GenerateProtos(protoFile string) error {
 	cmd := "protoc"
-	args := []string{"-I", ".:${GOPATH}/src", "--go_out=.", "--go-grpc_out=.", "service.proto"}
+	args := []string{"-I", ".:${GOPATH}/src", "--go_out=.", "--go-grpc_out=.", protoFile}
 	return runCommand(cmd, args)
 }
 
