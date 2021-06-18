@@ -91,16 +91,20 @@ func parseProto(cfg Config) (serviceDef, error) {
 		return serviceDef{}, fmt.Errorf("failed to parse compiled proto go file: %w", err)
 	}
 
-	importStrs := []string{}
-	servicePath := filepath.Dir(cfg.GRPCFile)
-	for _, i := range f.Imports {
-		importStrs = append(importStrs, strings.Replace(i.Path.Value, `"`, "", -1))
-	}
-	importStrs = append(importStrs, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"))
-
+	imports := parseImports(cfg, f)
 	funcs := parseFuncs(cfg, f)
 
-	return serviceDef{Funcs: funcs, Imports: importStrs}, nil
+	return serviceDef{Funcs: funcs, Imports: imports}, nil
+}
+
+func parseImports(cfg Config, f *ast.File) []string {
+	imports := []string{}
+	servicePath := filepath.Dir(cfg.GRPCFile)
+	for _, i := range f.Imports {
+		imports = append(imports, strings.Replace(i.Path.Value, `"`, "", -1))
+	}
+	imports = append(imports, strings.Join([]string{cfg.ImportPath, strings.TrimLeft(servicePath, "/")}, "/"))
+	return imports
 }
 
 func parseFuncs(cfg Config, f *ast.File) []serviceFuncDef {
