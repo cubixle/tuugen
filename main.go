@@ -4,12 +4,14 @@ import (
 	"embed"
 	"io/ioutil"
 	"log"
+	"time"
 )
 
 //go:embed templates/*
 var FS embed.FS
 
 func main() {
+	tNow := time.Now()
 	// read config file
 	d, err := ioutil.ReadFile("tuugen.yml")
 	if err != nil {
@@ -59,6 +61,6 @@ func main() {
 		log.Fatalf("failed to run 'goimports': %v", err)
 	}
 	log.Println("------")
-	log.Println("🎉 All setup has been complete enjoy working on your business logic.")
+	log.Printf("🎉 All setup has been complete enjoy working on your business logic. took: %s\n", time.Since(tNow))
 	log.Println("------")
 }

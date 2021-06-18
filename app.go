@@ -3,8 +3,6 @@ package main
 import (
 	"embed"
 	"html/template"
-	"os"
-	"path/filepath"
 )
 
 func GenerateMain(FS embed.FS, cfg Config) error {
@@ -14,18 +12,14 @@ func GenerateMain(FS embed.FS, cfg Config) error {
 	}
 
 	outputFile := "cmd/app/main.go"
-	fp := filepath.Dir(outputFile)
-	if err := os.MkdirAll(fp, 0777); err != nil {
-		return err
-	}
-
-	f, err := os.Create(outputFile)
+	f, err := createFile(outputFile)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if err := t.Execute(f, cfg); err != nil {
 		return err
 	}
-	return nil
+
+	return f.Close()
 }

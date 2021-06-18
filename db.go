@@ -3,8 +3,6 @@ package main
 import (
 	"embed"
 	"html/template"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -14,21 +12,21 @@ type DataModel struct {
 }
 
 type DataProperty struct {
-	Name          string `yaml:"name"`
-	Type          string `yaml:"type"`
-	AutoIncrement bool   `yaml:"autoinc"`
+	Name string `yaml:"name"`
+	Type string `yaml:"type"`
 }
 
 func (p DataProperty) NameCorrected() string {
-	if strings.Contains(p.Name, "_") {
-		parts := strings.Split(p.Name, "_")
-		newParts := []string{}
-		for _, p := range parts {
-			newParts = append(newParts, strings.Title(p))
-		}
-		return strings.Join(newParts, "")
+	if !strings.Contains(p.Name, "_") {
+		return strings.Title(p.Name)
 	}
-	return strings.Title(p.Name)
+
+	parts := strings.Split(p.Name, "_")
+	newParts := []string{}
+	for _, p := range parts {
+		newParts = append(newParts, strings.Title(p))
+	}
+	return strings.Join(newParts, "")
 }
 
 func (p DataProperty) DBTypeToGoType() string {
@@ -52,15 +50,11 @@ func GenerateDataModels(FS embed.FS, cfg Config) error {
 		}
 
 		outputFile := "internal/storage/" + strings.ToLower(dm.Name) + ".go"
-		fp := filepath.Dir(outputFile)
-		if err := os.MkdirAll(fp, 0777); err != nil {
+		f, err := createFile(outputFile)
+		if err != nil {
 			return err
 		}
-
-		f, err := os.Create(outputFile)
-		if err != nil {
-			return nil
-		}
+		defer f.Close()
 
 		if err := t.Execute(f, dm); err != nil {
 			return err

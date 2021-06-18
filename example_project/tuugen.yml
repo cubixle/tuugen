@@ -8,7 +8,6 @@ data_models:
     properties:
       - name: id
         type: varchar
-        autoinc: true
       - name: team_id
         type: varchar
       - name: name

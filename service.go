@@ -7,7 +7,6 @@ import (
 	"go/parser"
 	"go/token"
 	"html/template"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -50,23 +49,6 @@ func (s serviceFuncDef) ArgsToStr() string {
 
 // generate the service/interactor template and store it to a file.
 func createFileFromProto(FS embed.FS, cfg Config, templateFile, outputFile string) error {
-	//  load service template
-	t, err := template.ParseFS(FS, templateFile)
-	if err != nil {
-		return err
-	}
-
-	// check/create file path
-	fp := filepath.Dir(outputFile)
-
-	if err := os.MkdirAll(fp, 0777); err != nil {
-		return err
-	}
-
-	f, err := os.Create(outputFile)
-	if err != nil {
-		return nil
-	}
 	def, err := parseProto(cfg)
 	if err != nil {
 		return err
@@ -75,6 +57,16 @@ func createFileFromProto(FS embed.FS, cfg Config, templateFile, outputFile strin
 	// dirty check to see if we need to import the interactors.
 	if strings.Contains(templateFile, "service") {
 		def.Imports = append(def.Imports, cfg.ImportPath+"/internal/interactors")
+	}
+
+	f, err := createFile(outputFile)
+	if err != nil {
+		return err
+	}
+
+	t, err := template.ParseFS(FS, templateFile)
+	if err != nil {
+		return err
 	}
 
 	if err := t.Execute(f, def); err != nil {
