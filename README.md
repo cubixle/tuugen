@@ -1,6 +1,6 @@
 # Tuugen
 
-Tuugen takes a tuugen.yml and a grpc proto definition to generate common boiler plate logic. Some of the common boiler plate it generates is http routes, grpc service, basic data model structs and a main file with some default plumbing.
+Tuugen takes a tuugen.yml and a grpc proto definition file to generate common boiler plate logic. Some of the common boiler plate it generates is http routes, grpc service, basic data model structs and a main file with some default plumbing.
 
 Tuugen adds an interactor package which the http and grpc transport layers use for business logic.
 
